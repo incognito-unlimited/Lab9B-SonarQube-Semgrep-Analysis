@@ -1,0 +1,77 @@
+{
+  "components": [
+    {
+      "enabled": true,
+      "key": "lab9b-aes-file-demo:application/src/aes_file_demo.py",
+      "longName": "application/src/aes_file_demo.py",
+      "name": "aes_file_demo.py",
+      "path": "application/src/aes_file_demo.py",
+      "qualifier": "FIL"
+    },
+    {
+      "enabled": true,
+      "key": "lab9b-aes-file-demo",
+      "longName": "Lab 9B - AES file demo under analysis",
+      "name": "Lab 9B - AES file demo under analysis",
+      "qualifier": "TRK"
+    }
+  ],
+  "effortTotal": 20,
+  "facets": [],
+  "issues": [
+    {
+      "author": "",
+      "cleanCodeAttribute": "TRUSTWORTHY",
+      "cleanCodeAttributeCategory": "RESPONSIBLE",
+      "codeVariants": [],
+      "component": "lab9b-aes-file-demo:application/src/aes_file_demo.py",
+      "creationDate": "2026-11-25T15:34:51+0000",
+      "debt": "20min",
+      "effort": "20min",
+      "flows": [],
+      "fromSonarQubeUpdate": false,
+      "hash": "725f10363a48609485bff6135c1f96e1",
+      "impacts": [
+        {
+          "severity": "HIGH",
+          "softwareQuality": "SECURITY"
+        }
+      ],
+      "internalTags": [],
+      "issueStatus": "OPEN",
+      "key": "1aef8dbb-e221-4752-a421-9d4c6f6436ef",
+      "line": 144,
+      "linkedTicketStatus": "NOT_LINKED",
+      "message": "Use secure mode and padding scheme.",
+      "messageFormattings": [],
+      "prioritizedRule": false,
+      "project": "lab9b-aes-file-demo",
+      "quickFixAvailable": false,
+      "rule": "python:S5542",
+      "scope": "MAIN",
+      "severity": "CRITICAL",
+      "status": "OPEN",
+      "tags": [
+        "cwe",
+        "cryptography",
+        "privacy"
+      ],
+      "textRange": {
+        "endLine": 144,
+        "endOffset": 53,
+        "startLine": 144,
+        "startOffset": 42
+      },
+      "type": "VULNERABILITY",
+      "updateDate": "2026-11-25T15:34:51+0000"
+    }
+  ],
+  "p": 1,
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 100,
+    "total": 1
+  },
+  "ps": 100,
+  "total": 1
+}

@@ -1,0 +1,87 @@
+{
+  "actives": [],
+  "rule": {
+    "cleanCodeAttribute": "TRUSTWORTHY",
+    "cleanCodeAttributeCategory": "RESPONSIBLE",
+    "createdAt": "2026-11-25T15:31:16+0000",
+    "debtRemFnType": "CONSTANT_ISSUE",
+    "defaultDebtRemFnType": "CONSTANT_ISSUE",
+    "defaultRemFnBaseEffort": "20min",
+    "defaultRemFnType": "CONSTANT_ISSUE",
+    "descriptionSections": [
+      {
+        "content": "<h4>Noncompliant code example</h4>\n<p>Example with a symmetric cipher, AES:</p>\n<pre data-diff-id=\"11\" data-diff-type=\"noncompliant\">\nfrom Crypto.Cipher import AES\n\nAES.new(key, AES.MODE_ECB) # Noncompliant\n</pre>\n<p>Example with an asymmetric cipher, RSA:</p>\n<pre data-diff-id=\"12\" data-diff-type=\"noncompliant\">\nfrom Crypto.Cipher import PKCS1_v1_5\n\nPKCS1_v1_5.new(key) # Noncompliant\n</pre>\n<h4>Compliant solution</h4>\n<p>Since PyCrypto is not supported anymore, another library should be used. In the current context, Cryptodome uses a similar API.</p>\n<p>For the AES symmetric cipher, use the GCM mode:</p>\n<pre data-diff-id=\"11\" data-diff-type=\"compliant\">\nfrom Crypto.Cipher import AES\n\nAES.new(key, AES.MODE_GCM)\n</pre>\n<p>For the RSA asymmetric cipher, use the Optimal Asymmetric Encryption Padding (OAEP):</p>\n<pre data-diff-id=\"12\" data-diff-type=\"compliant\">\nfrom Crypto.Cipher import PKCS1_OAEP\n\nPKCS1_OAEP.new(key)\n</pre>\n<h3>How does this work?</h3>\n<p>As a rule of thumb, use the cryptographic algorithms and mechanisms that are considered strong by the cryptographic community.</p>\n<p>Appropriate choices are currently the following.</p>\n<h4>For AES: use authenticated encryption modes</h4>\n<p>The best-known authenticated encryption mode for AES is Galois/Counter mode (GCM).</p>\n<p>GCM mode combines encryption with authentication and integrity checks using a cryptographic hash function and provides both confidentiality and\nauthenticity of data.</p>\n<p>Other similar modes are:</p>\n<ul>\n  <li>CCM: <code>Counter with CBC-MAC</code></li>\n  <li>CWC: <code>Cipher Block Chaining with Message Authentication Code</code></li>\n  <li>EAX: <code>Encrypt-and-Authenticate</code></li>\n  <li>IAPM: <code>Integer Authenticated Parallelizable Mode</code></li>\n  <li>OCB: <code>Offset Codebook Mode</code></li>\n</ul>\n<h4>For RSA: use the OAEP scheme</h4>\n<p>The Optimal Asymmetric Encryption Padding scheme (OAEP) adds randomness and a secure hash function that strengthens the regular inner workings of\nRSA.</p>\n<h4>For RSA signatures: use the RSASSA-PSS scheme</h4>\n<p>The Probabilistic Signature Scheme (RSASSA-PSS) uses a randomized encoding and comes with a security proof, whereas the older PKCS#1 v1.5 signature\nscheme (RSASSA-PKCS1-v1_5) has none and has repeatedly enabled signature forgery against flawed verifier implementations.</p>\n<p><a href=\"https://datatracker.ietf.org/doc/html/rfc8017#section-8\">IETF RFC 8017</a> therefore requires RSASSA-PSS for new applications, in the\ninterest of increased robustness.</p>",
+        "context": {
+          "displayName": "PyCrypto",
+          "key": "pycrypto"
+        },
+        "key": "how_to_fix"
+      },
+      {
+        "content": "<p>Encryption algorithms are essential for protecting sensitive information and ensuring secure communications in a variety of domains. They are used\nfor several important reasons:</p>\n<ul>\n  <li>Confidentiality, privacy, and intellectual property protection</li>\n  <li>Security during transmission or on storage devices</li>\n  <li>Data integrity, general trust, and authentication</li>\n</ul>\n<p>When selecting encryption algorithms, tools, or combinations, you should also consider two things:</p>\n<ol>\n  <li>No encryption is unbreakable.</li>\n  <li>The strength of an encryption algorithm is usually measured by the effort required to crack it within a reasonable time frame.</li>\n</ol>\n<p>For these reasons, as soon as cryptography is included in a project, it is important to choose encryption algorithms that are considered strong and\nsecure by the cryptography community.</p>\n<p>For AES, the weakest mode is ECB (Electronic Codebook). Repeated blocks of data are encrypted to the same value, making them easy to identify and\nreducing the difficulty of recovering the original cleartext.</p>\n<p>For RSA, the weakest algorithms are either using it without padding or using the PKCS1v1.5 padding scheme.</p>\n<p>For RSA signatures, the generally recommended good practice is to use RSASSA-PSS.</p>\n<h3>What is the potential impact?</h3>\n<p>The cleartext of an encrypted message might be recoverable, modifiable, or a signature might be forged.</p>\n<p>Below are some real-world scenarios that illustrate possible impacts of an attacker exploiting the vulnerability.</p>\n<h4>Theft of sensitive data</h4>\n<p>The encrypted message might contain data that is considered sensitive and should not be known to third parties.</p>\n<p>By using a weak algorithm the likelihood that an attacker might be able to recover the cleartext drastically increases.</p>\n<h4>Additional attack surface</h4>\n<p>By modifying the cleartext of the encrypted message it might be possible for an attacker to trigger other vulnerabilities in the code. Encrypted\nvalues are often considered trusted, since under normal circumstances it would not be possible for a third party to modify them.</p>\n<h4>Forged signatures</h4>\n<p>A weak signature padding scheme without a security proof might allow an attacker to forge a signature that a flawed verifier implementation accepts\nas valid, undermining the trust and integrity guarantees signatures are meant to provide.</p>",
+        "key": "root_cause"
+      },
+      {
+        "content": "<h4>Noncompliant code example</h4>\n<pre data-diff-id=\"31\" data-diff-type=\"noncompliant\">\nimport pyDes\n\npyDes.des(key) # Noncompliant\n</pre>\n<h4>Compliant solution</h4>\n<p>Since pyDes only provides DES, it is recommended to use another library like pyca.</p>\n<pre data-diff-id=\"31\" data-diff-type=\"compliant\">\nfrom cryptography.hazmat.primitives.ciphers import (\n    Cipher,\n    algorithms,\n    modes,\n)\nfrom cryptography.hazmat.backends import default_backend\n\nCipher(algorithms.AES(key), modes.GCM(iv), backend=default_backend())\n</pre>\n<h3>How does this work?</h3>\n<p>As a rule of thumb, use the cryptographic algorithms and mechanisms that are considered strong by the cryptographic community.</p>\n<p>Appropriate choices are currently the following.</p>\n<h4>For AES: use authenticated encryption modes</h4>\n<p>The best-known authenticated encryption mode for AES is Galois/Counter mode (GCM).</p>\n<p>GCM mode combines encryption with authentication and integrity checks using a cryptographic hash function and provides both confidentiality and\nauthenticity of data.</p>\n<p>Other similar modes are:</p>\n<ul>\n  <li>CCM: <code>Counter with CBC-MAC</code></li>\n  <li>CWC: <code>Cipher Block Chaining with Message Authentication Code</code></li>\n  <li>EAX: <code>Encrypt-and-Authenticate</code></li>\n  <li>IAPM: <code>Integer Authenticated Parallelizable Mode</code></li>\n  <li>OCB: <code>Offset Codebook Mode</code></li>\n</ul>\n<h4>For RSA: use the OAEP scheme</h4>\n<p>The Optimal Asymmetric Encryption Padding scheme (OAEP) adds randomness and a secure hash function that strengthens the regular inner workings of\nRSA.</p>\n<h4>For RSA signatures: use the RSASSA-PSS scheme</h4>\n<p>The Probabilistic Signature Scheme (RSASSA-PSS) uses a randomized encoding and comes with a security proof, whereas the older PKCS#1 v1.5 signature\nscheme (RSASSA-PKCS1-v1_5) has none and has repeatedly enabled signature forgery against flawed verifier implementations.</p>\n<p><a href=\"https://datatracker.ietf.org/doc/html/rfc8017#section-8\">IETF RFC 8017</a> therefore requires RSASSA-PSS for new applications, in the\ninterest of increased robustness.</p>",
+        "context": {
+          "displayName": "pyDes",
+          "key": "pydes"
+        },
+        "key": "how_to_fix"
+      },
+      {
+        "content": "<h4>Noncompliant code example</h4>\n<p>Example with a symmetric cipher, AES:</p>\n<pre data-diff-id=\"1\" data-diff-type=\"noncompliant\">\nfrom cryptography.hazmat.primitives.ciphers import (\n    Cipher,\n    algorithms,\n    modes,\n)\nfrom cryptography.hazmat.backends import default_backend\n\nCipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend()) # Noncompliant\n</pre>\n<p>Example with an asymmetric cipher, RSA:</p>\n<pre data-diff-id=\"2\" data-diff-type=\"noncompliant\">\nfrom cryptography.hazmat.primitives.asymmetric import (\n    rsa,\n    padding,\n)\n\nprivate_key = rsa.generate_private_key(\n  public_exponent=65537,\n  key_size=2048,\n  backend=default_backend()\n)\n\npublic_key = private_key.public_key()\n\npublic_key.encrypt(\n  message,\n  padding.PKCS1v15() # Noncompliant\n)\n</pre>\n<h4>Compliant solution</h4>\n<p>For the AES symmetric cipher, use the GCM mode:</p>\n<pre data-diff-id=\"1\" data-diff-type=\"compliant\">\nfrom cryptography.hazmat.primitives.ciphers import (\n    Cipher,\n    algorithms,\n    modes,\n)\nfrom cryptography.hazmat.backends import default_backend\n\nCipher(algorithms.AES(key), modes.GCM(iv), backend=default_backend())\n</pre>\n<pre data-diff-id=\"2\" data-diff-type=\"compliant\">\nfrom cryptography.hazmat.primitives.asymmetric import (\n    rsa,\n    padding,\n)\nfrom cryptography.hazmat.primitives import hashes\n\nprivate_key = rsa.generate_private_key(\n  public_exponent=65537,\n  key_size=2048,\n  backend=default_backend()\n)\n\npublic_key = private_key.public_key()\n\npublic_key.encrypt(\n  message,\n  padding.OAEP(\n    mgf=padding.MGF1(algorithm=hashes.SHA256()),\n    algorithm=hashes.SHA256(),\n    label=None\n  )\n)\n</pre>\n<h3>How does this work?</h3>\n<p>As a rule of thumb, use the cryptographic algorithms and mechanisms that are considered strong by the cryptographic community.</p>\n<p>Appropriate choices are currently the following.</p>\n<h4>For AES: use authenticated encryption modes</h4>\n<p>The best-known authenticated encryption mode for AES is Galois/Counter mode (GCM).</p>\n<p>GCM mode combines encryption with authentication and integrity checks using a cryptographic hash function and provides both confidentiality and\nauthenticity of data.</p>\n<p>Other similar modes are:</p>\n<ul>\n  <li>CCM: <code>Counter with CBC-MAC</code></li>\n  <li>CWC: <code>Cipher Block Chaining with Message Authentication Code</code></li>\n  <li>EAX: <code>Encrypt-and-Authenticate</code></li>\n  <li>IAPM: <code>Integer Authenticated Parallelizable Mode</code></li>\n  <li>OCB: <code>Offset Codebook Mode</code></li>\n</ul>\n<h4>For RSA: use the OAEP scheme</h4>\n<p>The Optimal Asymmetric Encryption Padding scheme (OAEP) adds randomness and a secure hash function that strengthens the regular inner workings of\nRSA.</p>\n<h4>For RSA signatures: use the RSASSA-PSS scheme</h4>\n<p>The Probabilistic Signature Scheme (RSASSA-PSS) uses a randomized encoding and comes with a security proof, whereas the older PKCS#1 v1.5 signature\nscheme (RSASSA-PKCS1-v1_5) has none and has repeatedly enabled signature forgery against flawed verifier implementations.</p>\n<p><a href=\"https://datatracker.ietf.org/doc/html/rfc8017#section-8\">IETF RFC 8017</a> therefore requires RSASSA-PSS for new applications, in the\ninterest of increased robustness.</p>",
+        "context": {
+          "displayName": "pyca",
+          "key": "pyca"
+        },
+        "key": "how_to_fix"
+      },
+      {
+        "content": "<h3>Articles &amp; blog posts</h3>\n<ul>\n  <li><a href=\"https://en.wikipedia.org/wiki/Padding_oracle_attack\">Wikipedia, Padding Oracle Attack</a></li>\n  <li><a href=\"https://en.wikipedia.org/wiki/Chosen-ciphertext_attack\">Wikipedia, Chosen-Ciphertext Attack</a></li>\n  <li><a href=\"https://en.wikipedia.org/wiki/Chosen-plaintext_attack\">Wikipedia, Chosen-Plaintext Attack</a></li>\n  <li><a href=\"https://en.wikipedia.org/wiki/Semantic_security\">Wikipedia, Semantically Secure Cryptosystems</a></li>\n  <li><a href=\"https://en.wikipedia.org/wiki/Optimal_asymmetric_encryption_padding\">Wikipedia, OAEP</a></li>\n  <li><a href=\"https://en.wikipedia.org/wiki/Galois/Counter_Mode\">Wikipedia, Galois/Counter Mode</a></li>\n</ul>\n<h3>Standards</h3>\n<ul>\n  <li>OWASP - <a href=\"https://owasp.org/Top10/A02_2021-Cryptographic_Failures/\">Top 10 2021 Category A2 - Cryptographic Failures</a></li>\n  <li>OWASP - <a href=\"https://github.com/OWASP/Top10/blob/master/2017/en/0xa3-sensitive-data-disclosure.md\">Top 10 2017 Category A3 - Sensitive Data\n  Exposure</a></li>\n  <li>OWASP - <a href=\"https://github.com/OWASP/Top10/blob/master/2017/en/0xa6-security-misconfiguration.md\">Top 10 2017 Category A6 - Security\n  Misconfiguration</a></li>\n  <li>CWE - <a href=\"https://cwe.mitre.org/data/definitions/327\">CWE-327 - Use of a Broken or Risky Cryptographic Algorithm</a></li>\n</ul>",
+        "key": "resources"
+      },
+      {
+        "content": "<p>This vulnerability exposes encrypted data to a number of attacks whose goal is to recover the plaintext.</p>",
+        "key": "introduction"
+      },
+      {
+        "content": "<h4>Noncompliant code example</h4>\n<p>Example with a symmetric cipher, AES:</p>\n<pre data-diff-id=\"21\" data-diff-type=\"noncompliant\">\nfrom Crypto.Cipher import AES     # pycryptodome\nfrom Cryptodome.Cipher import AES # pycryptodomex\n\nAES.new(key, AES.MODE_ECB)  # Noncompliant\n</pre>\n<p>Example with an asymmetric cipher, RSA:</p>\n<pre data-diff-id=\"22\" data-diff-type=\"noncompliant\">\nfrom Crypto.Cipher import PKCS1_V1_5     # pycryptodome\nfrom Cryptodome.Cipher import PKCS1_V1_5 # pycryptodomex\n\nPKCS1_v1_5.new(key) # Noncompliant\n</pre>\n<h4>Compliant solution</h4>\n<p>For the AES symmetric cipher, use the GCM mode:</p>\n<pre data-diff-id=\"21\" data-diff-type=\"compliant\">\nfrom Crypto.Cipher import AES     # pycryptodome\nfrom Cryptodome.Cipher import AES # pycryptodomex\n\nAES.new(key, AES.MODE_GCM)\n</pre>\n<p>For the RSA asymmetric cipher, use the Optimal Asymmetric Encryption Padding (OAEP):</p>\n<pre data-diff-id=\"22\" data-diff-type=\"compliant\">\nfrom Crypto.Cipher import PKCS1_V1_5     # pycryptodome\nfrom Cryptodome.Cipher import PKCS1_V1_5 # pycryptodomex\n\nPKCS1_OAEP.new(key)\n</pre>\n<h3>How does this work?</h3>\n<p>As a rule of thumb, use the cryptographic algorithms and mechanisms that are considered strong by the cryptographic community.</p>\n<p>Appropriate choices are currently the following.</p>\n<h4>For AES: use authenticated encryption modes</h4>\n<p>The best-known authenticated encryption mode for AES is Galois/Counter mode (GCM).</p>\n<p>GCM mode combines encryption with authentication and integrity checks using a cryptographic hash function and provides both confidentiality and\nauthenticity of data.</p>\n<p>Other similar modes are:</p>\n<ul>\n  <li>CCM: <code>Counter with CBC-MAC</code></li>\n  <li>CWC: <code>Cipher Block Chaining with Message Authentication Code</code></li>\n  <li>EAX: <code>Encrypt-and-Authenticate</code></li>\n  <li>IAPM: <code>Integer Authenticated Parallelizable Mode</code></li>\n  <li>OCB: <code>Offset Codebook Mode</code></li>\n</ul>\n<h4>For RSA: use the OAEP scheme</h4>\n<p>The Optimal Asymmetric Encryption Padding scheme (OAEP) adds randomness and a secure hash function that strengthens the regular inner workings of\nRSA.</p>\n<h4>For RSA signatures: use the RSASSA-PSS scheme</h4>\n<p>The Probabilistic Signature Scheme (RSASSA-PSS) uses a randomized encoding and comes with a security proof, whereas the older PKCS#1 v1.5 signature\nscheme (RSASSA-PKCS1-v1_5) has none and has repeatedly enabled signature forgery against flawed verifier implementations.</p>\n<p><a href=\"https://datatracker.ietf.org/doc/html/rfc8017#section-8\">IETF RFC 8017</a> therefore requires RSASSA-PSS for new applications, in the\ninterest of increased robustness.</p>",
+        "context": {
+          "displayName": "Cryptodome",
+          "key": "cryptodome"
+        },
+        "key": "how_to_fix"
+      }
+    ],
+    "educationPrinciples": [],
+    "impacts": [
+      {
+        "severity": "HIGH",
+        "softwareQuality": "SECURITY"
+      }
+    ],
+    "isExternal": false,
+    "isTemplate": false,
+    "key": "python:S5542",
+    "lang": "py",
+    "langName": "Python",
+    "name": "Encryption algorithms should be used with secure mode and padding scheme",
+    "params": [],
+    "remFnBaseEffort": "20min",
+    "remFnOverloaded": false,
+    "remFnType": "CONSTANT_ISSUE",
+    "repo": "python",
+    "scope": "MAIN",
+    "severity": "CRITICAL",
+    "status": "READY",
+    "sysTags": [
+      "cwe",
+      "cryptography",
+      "privacy"
+    ],
+    "tags": [],
+    "type": "VULNERABILITY",
+    "updatedAt": "2026-11-25T15:31:16+0000"
+  }
+}

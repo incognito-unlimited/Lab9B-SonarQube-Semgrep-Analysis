@@ -1,0 +1,20 @@
+# Local secrets and scanner credentials
+.env
+.env.*
+!.env.example
+*.token
+sonar-token*
+*.key
+*.pem
+*.pfx
+*.p12
+
+# Tool caches and Python artifacts
+.semgrep/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Temporary analysis output
+*.tmp

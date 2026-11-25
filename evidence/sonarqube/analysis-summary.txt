@@ -1,0 +1,29 @@
+SonarQube API-derived analysis evidence
+Server URL: http://127.0.0.1:9000
+SonarQube version: 26.11.0.134175
+Server ID: 147B411E-AaITVNbE5akTbNds9Oll
+Status: UP
+Project key: lab9b-aes-file-demo
+Active Python quality profile: Sonar way core
+
+Measures:
+  ncloc = 207
+  code_smells = 0
+  vulnerabilities = 1
+  security_hotspots = 0
+  bugs = 0
+  comment_lines = 23
+  complexity = 29
+  cognitive_complexity = 23
+  security_rating = 4.0
+  reliability_rating = 1.0
+
+Open issues: 1
+  [VULNERABILITY / CRITICAL] python:S5542
+    location: lab9b-aes-file-demo:application/src/aes_file_demo.py:144
+    message: Use secure mode and padding scheme.
+    impact: SECURITY=HIGH
+
+Security hotspots: 0
+
+Token was supplied via SONAR_TOKEN and is not present in any saved file.

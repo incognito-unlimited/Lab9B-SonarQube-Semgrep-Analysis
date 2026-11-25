@@ -1,0 +1,100 @@
+
+==============================================================================
+TEST 1 - Key generation and environment-variable loading
+==============================================================================
+Environment variable used: LAB9A_AES_KEY_BASE64
+Key material: 32 bytes (AES-256); value intentionally not displayed.
+Source: CSPRNG os.urandom via --generate-key; loaded from environment at runtime.
+
+==============================================================================
+TEST 2 - Structured input and repeated block structure
+==============================================================================
+File: samples/repeated_input.txt  |  size: 384 bytes
+AES block size: 16 bytes  |  plaintext blocks: 24
+SHA-256 of original: 0e14a4176f1512ee5fc92d73a8602204906cf2118bf565adc0626908b95f4cbe
+Each 16-byte record is the identical ASCII line 'BLOCK-REPEAT-01' followed by LF.
+First 4 plaintext blocks (hex):
+  block 00: 424c4f434b2d5245504541542d30310a
+  block 01: 424c4f434b2d5245504541542d30310a
+  block 02: 424c4f434b2d5245504541542d30310a
+  block 03: 424c4f434b2d5245504541542d30310a
+  0000  42 4c 4f 43 4b 2d 52 45 50 45 41 54 2d 30 31 0a  |BLOCK-REPEAT-01.|
+  0010  42 4c 4f 43 4b 2d 52 45 50 45 41 54 2d 30 31 0a  |BLOCK-REPEAT-01.|
+  0020  42 4c 4f 43 4b 2d 52 45 50 45 41 54 2d 30 31 0a  |BLOCK-REPEAT-01.|
+  0030  42 4c 4f 43 4b 2d 52 45 50 45 41 54 2d 30 31 0a  |BLOCK-REPEAT-01.|
+  0040  42 4c 4f 43 4b 2d 52 45 50 45 41 54 2d 30 31 0a  |BLOCK-REPEAT-01.|
+  0050  42 4c 4f 43 4b 2d 52 45 50 45 41 54 2d 30 31 0a  |BLOCK-REPEAT-01.|
+  0060  42 4c 4f 43 4b 2d 52 45 50 45 41 54 2d 30 31 0a  |BLOCK-REPEAT-01.|
+  0070  42 4c 4f 43 4b 2d 52 45 50 45 41 54 2d 30 31 0a  |BLOCK-REPEAT-01.|
+  ... (256 further bytes omitted from this view)
+
+==============================================================================
+TEST 3 - AES-ECB encryption (PKCS#7 padding, no IV)
+==============================================================================
+Padded length: 400 bytes (25 blocks); PKCS#7 adds 16 byte(s).
+ECB ciphertext length: 400 bytes; output format: hexadecimal.
+  ciphertext block 00: 3ed08c28a1dc591f97c16c38ac73f815
+  ciphertext block 01: 3ed08c28a1dc591f97c16c38ac73f815
+  ciphertext block 02: 3ed08c28a1dc591f97c16c38ac73f815
+  ciphertext block 03: 3ed08c28a1dc591f97c16c38ac73f815
+  ciphertext block 04: 3ed08c28a1dc591f97c16c38ac73f815
+  ciphertext block 24 (PKCS#7 padding): 7eefa05e3eec9ca1e469637bbe3fe2ee
+
+==============================================================================
+TEST 4 - Repeated ECB ciphertext block identification
+==============================================================================
+Distinct ECB ciphertext blocks: 2 of 25 total.
+Repeated block 3ed08c28a1dc591f97c16c38ac73f815
+  occurs 24 times at block indices: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] ...
+Result: identical plaintext blocks produced byte-identical ECB ciphertext blocks under the same key.
+
+==============================================================================
+TEST 5 - AES-GCM encryption of the same original input
+==============================================================================
+Algorithm: AES-256-GCM; nonce: 12 fresh random bytes; tag: 16 bytes.
+Nonce 1 (base64, not secret): SgkG6b1+lg7zQK6S
+Authentication tag 1 (base64): rLS4Km21CHIAZSjRaoflsw==
+Ciphertext 1 length: 384 bytes (no padding required).
+Ciphertext 1 first 64 hex bytes:
+  0000  27 c0 e6 ce 8a 70 f7 03 53 dc 88 62 a8 76 51 af  |'....p..S..b.vQ.|
+  0010  15 4d a2 1c 41 46 16 33 1f 1d 2f 62 a6 51 a7 df  |.M..AF.3../b.Q..|
+  0020  fa 9f e7 cc 19 cb 90 22 2e 5d 11 4b bc 74 5f e6  |.......".].K.t_.|
+  0030  e6 3c cb 70 27 24 d3 ff 26 d4 69 da d6 0d 8a 6f  |.<.p'$..&.i....o|
+  ... (320 further bytes omitted from this view)
+Second encryption nonce (base64): cAEkwpUuhrs9nsso
+Fresh nonce differs from first: True; ciphertext differs: True
+Stored nonce, tag and ciphertext together in outputs/gcm_envelope.json.
+
+==============================================================================
+TEST 6 - Valid GCM decryption and byte-for-byte comparison
+==============================================================================
+decryptor.finalize() completed: authentication tag verified.
+Recovered length: 384 bytes; original length: 384 bytes
+Original SHA-256   : 0e14a4176f1512ee5fc92d73a8602204906cf2118bf565adc0626908b95f4cbe
+Recovered SHA-256  : 0e14a4176f1512ee5fc92d73a8602204906cf2118bf565adc0626908b95f4cbe
+Byte-for-byte equality (original == recovered): True
+Hash equality: True
+
+==============================================================================
+TEST 7 - GCM ciphertext tampering and authentication failure
+==============================================================================
+Modified exactly one ciphertext byte at index 192: 0xc5 -> 0xc4
+Original nonce and original authentication tag were retained unchanged.
+Actual library authentication failure: cryptography.exceptions.InvalidTag; str(exc)=''; repr(exc)=InvalidTag()
+Tampered plaintext file created: False (must be False)
+Result: unauthenticated plaintext was not produced or treated as valid output.
+
+==============================================================================
+TEST 8 - Secret-exclusion configuration (see evidence screenshot for git output)
+==============================================================================
+.gitignore excludes: .env, *.key, *.pem, outputs/*.bin, outputs/*.json, __pycache__/
+.env.example contains only the placeholder: LAB9A_AES_KEY_BASE64=REPLACE_WITH_YOUR_OWN_BASE64_AES_256_KEY
+No key value appears anywhere in this log or in the generated evidence.
+
+==============================================================================
+SUMMARY
+==============================================================================
+ECB repeated-block leakage observed: yes
+Valid GCM decryption matched original byte-for-byte: True
+Tampered GCM ciphertext rejected with InvalidTag: True
+End of execution log.

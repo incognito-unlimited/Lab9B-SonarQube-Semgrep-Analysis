@@ -1,0 +1,60 @@
+Lab 9B exact scan commands and tool versions
+============================================
+
+Application revision
+--------------------
+Source: Lab9A-AES-ECB-GCM @ 10ec6061cc77ed67f0956ef5938c1227c05efabd
+Copied to: application/src/aes_file_demo.py (SHA-256 2FA3519719348E221B99784AAFFB70DE15AF64AFB67513AA13B9B647AA4FC6C6)
+Sample SHA-256: 0E14A4176F1512EE5FC92D73A8602204906CF2118BF565ADC0626908B95F4CBE
+
+SonarQube
+---------
+Server: SonarQube Community Edition 26.11.0.134175 (local Docker container sonarqube:community)
+Server ID: 147B411E-AaITVNbE5akTbNds9Oll
+Scanner: SonarScanner CLI 8.5.0.16571 (image sonarsource/sonar-scanner-cli:latest)
+Project key: lab9b-aes-file-demo
+Quality profile for Python: Sonar way core (from scanner log)
+Analysis date: 2026-11-25
+Token: generated locally via /api/user_tokens/generate and supplied only through the SONAR_TOKEN environment variable. No token is stored in this repository.
+
+Create project (local, one time):
+  POST /api/projects/create?project=lab9b-aes-file-demo&name=Lab%209B%20AES%20file%20demo
+
+Run scanner (from repository root):
+  $env:SONAR_TOKEN = <local token read from a temp file outside the repository>
+  $env:SONAR_HOST_URL = 'http://host.docker.internal:9000'
+  docker run --rm -e SONAR_HOST_URL -e SONAR_TOKEN `
+    -v "<repo>:/usr/src" -w /usr/src sonarsource/sonar-scanner-cli:latest `
+    "-Dproject.settings=/usr/src/config/sonar-project.properties"
+
+Collect evidence:
+  $env:SONAR_HOST_URL = 'http://127.0.0.1:9000'
+  python scripts/sonar_evidence.py
+
+Result: 1 vulnerability, 0 hotspots, 0 bugs, 0 code smells, 207 ncloc.
+Full scanner log: evidence/sonarqube/scanner-output.txt
+API evidence: evidence/sonarqube/
+
+Semgrep
+-------
+CLI version: 1.187.0
+Rulesets: Semgrep Registry p/python + repository custom rules config/semgrep/python-security.yml
+Scan target: application/src (1 Python file)
+Rules run: 153; errors: 0; findings: 2
+
+Commands (also in scripts/semgrep_scan.ps1):
+  semgrep --version
+  semgrep scan --config p/python --config config/semgrep/python-security.yml `
+    --metrics off --disable-version-check --json `
+    --output evidence/semgrep/semgrep.json application/src
+  semgrep scan --config p/python --config config/semgrep/python-security.yml `
+    --metrics off --disable-version-check `
+    --output evidence/semgrep/semgrep.txt application/src
+
+Outputs: evidence/semgrep/semgrep.json and evidence/semgrep/semgrep.txt
+
+Dynamic checks
+--------------
+  python scripts/correlate_dynamic.py
+  # Controlled Windows ACL check already captured in evidence/dynamic-tests/env-permission-check.txt
+  # (Get-Acl on the gitignored Lab 9A .env; key value intentionally omitted)

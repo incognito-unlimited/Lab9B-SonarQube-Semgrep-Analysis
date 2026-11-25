@@ -1,0 +1,62 @@
+Genuine excerpts from Lab 9A execution-log.txt (copied verbatim; no key values).
+Source revision: Lab9A-AES-ECB-GCM @ 10ec6061cc77ed67f0956ef5938c1227c05efabd
+
+--- TEST 2 - Structured input and repeated block structure ---
+File: samples/repeated_input.txt  |  size: 384 bytes
+AES block size: 16 bytes  |  plaintext blocks: 24
+SHA-256 of original: 0e14a4176f1512ee5fc92d73a8602204906cf2118bf565adc0626908b95f4cbe
+Each 16-byte record is the identical ASCII line 'BLOCK-REPEAT-01' followed by LF.
+First 4 plaintext blocks (hex):
+  block 00: 424c4f434b2d5245504541542d30310a
+  block 01: 424c4f434b2d5245504541542d30310a
+  block 02: 424c4f434b2d5245504541542d30310a
+  block 03: 424c4f434b2d5245504541542d30310a
+  0000  42 4c 4f 43 4b 2d 52 45 50 45 41 54 2d 30 31 0a  |BLOCK-REPEAT-01.|
+  0010  42 4c 4f 43 4b 2d 52 45 50 45 41 54 2d 30 31 0a  |BLOCK-REPEAT-01.|
+  0020  42 4c 4f 43 4b 2d 52 45 50 45 41 54 2d 30 31 0a  |BLOCK-REPEAT-01.|
+  0030  42 4c 4f 43 4b 2d 52 45 50 45 41 54 2d 30 31 0a  |BLOCK-REPEAT-01.|
+  0040  42 4c 4f 43 4b 2d 52 45 50 45 41 54 2d 30 31 0a  |BLOCK-REPEAT-01.|
+  0050  42 4c 4f 43 4b 2d 52 45 50 45 41 54 2d 30 31 0a  |BLOCK-REPEAT-01.|
+  0060  42 4c 4f 43 4b 2d 52 45 50 45 41 54 2d 30 31 0a  |BLOCK-REPEAT-01.|
+  0070  42 4c 4f 43 4b 2d 52 45 50 45 41 54 2d 30 31 0a  |BLOCK-REPEAT-01.|
+  ... (256 further bytes omitted from this view)
+
+--- TEST 3 - AES-ECB encryption (PKCS#7 padding, no IV) ---
+Padded length: 400 bytes (25 blocks); PKCS#7 adds 16 byte(s).
+ECB ciphertext length: 400 bytes; output format: hexadecimal.
+  ciphertext block 00: 3ed08c28a1dc591f97c16c38ac73f815
+  ciphertext block 01: 3ed08c28a1dc591f97c16c38ac73f815
+  ciphertext block 02: 3ed08c28a1dc591f97c16c38ac73f815
+  ciphertext block 03: 3ed08c28a1dc591f97c16c38ac73f815
+  ciphertext block 04: 3ed08c28a1dc591f97c16c38ac73f815
+  ciphertext block 24 (PKCS#7 padding): 7eefa05e3eec9ca1e469637bbe3fe2ee
+
+--- TEST 4 - Repeated ECB ciphertext block identification ---
+Distinct ECB ciphertext blocks: 2 of 25 total.
+Repeated block 3ed08c28a1dc591f97c16c38ac73f815
+  occurs 24 times at block indices: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] ...
+Result: identical plaintext blocks produced byte-identical ECB ciphertext blocks under the same key.
+
+--- TEST 6 - Valid GCM decryption and byte-for-byte comparison ---
+decryptor.finalize() completed: authentication tag verified.
+Recovered length: 384 bytes; original length: 384 bytes
+Original SHA-256   : 0e14a4176f1512ee5fc92d73a8602204906cf2118bf565adc0626908b95f4cbe
+Recovered SHA-256  : 0e14a4176f1512ee5fc92d73a8602204906cf2118bf565adc0626908b95f4cbe
+Byte-for-byte equality (original == recovered): True
+Hash equality: True
+
+--- TEST 7 - GCM ciphertext tampering and authentication failure ---
+Modified exactly one ciphertext byte at index 192: 0xc5 -> 0xc4
+Original nonce and original authentication tag were retained unchanged.
+Actual library authentication failure: cryptography.exceptions.InvalidTag; str(exc)=''; repr(exc)=InvalidTag()
+Tampered plaintext file created: False (must be False)
+Result: unauthenticated plaintext was not produced or treated as valid output.
+
+--- SUMMARY ---
+ECB repeated-block leakage observed: yes
+Valid GCM decryption matched original byte-for-byte: True
+Tampered GCM ciphertext rejected with InvalidTag: True
+End of execution log.
+
+GCM tamper rejection is a security-control verification, not a static vulnerability finding.
+No dynamic test demonstrated a file-path or upload vulnerability because the application has no such input surface.

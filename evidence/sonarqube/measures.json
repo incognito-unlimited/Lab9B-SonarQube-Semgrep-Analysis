@@ -1,0 +1,15 @@
+{
+  "component": "lab9b-aes-file-demo",
+  "metrics": {
+    "bugs": "0",
+    "code_smells": "0",
+    "cognitive_complexity": "23",
+    "comment_lines": "23",
+    "complexity": "29",
+    "ncloc": "207",
+    "reliability_rating": "1.0",
+    "security_hotspots": "0",
+    "security_rating": "4.0",
+    "vulnerabilities": "1"
+  }
+}

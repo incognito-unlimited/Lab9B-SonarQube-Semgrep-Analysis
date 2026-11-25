@@ -1,0 +1,37 @@
+rules:
+  - id: lab9b.python.crypto.ecb-mode
+    patterns:
+      - pattern: modes.ECB()
+    message: >-
+      AES-ECB encrypts each block independently, so identical plaintext blocks produce
+      identical ciphertext blocks and reveal structure. Use an authenticated mode such as
+      AES-GCM with a unique nonce per encryption.
+    languages:
+      - python
+    severity: WARNING
+    confidence: HIGH
+    metadata:
+      category: security
+      cwe: "CWE-327: Use of a Broken or Risky Cryptographic Algorithm"
+      technology:
+        - python
+        - cryptography
+
+  - id: lab9b.python.secret.env-file-write
+    patterns:
+      - pattern: $TARGET.write_text(...)
+      - metavariable-regex:
+          metavariable: $TARGET
+          regex: ^ENV_FILE$
+    message: >-
+      A generated AES key is written to a predictable local file. Confirm restrictive
+      permissions and prefer an OS secret store where available; never commit this file.
+    languages:
+      - python
+    severity: WARNING
+    confidence: MEDIUM
+    metadata:
+      category: security
+      cwe: "CWE-522: Insufficiently Protected Credentials"
+      technology:
+        - python

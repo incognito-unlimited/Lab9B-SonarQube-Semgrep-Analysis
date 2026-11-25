@@ -1,0 +1,25 @@
+                   
+                   
+┌─────────────────┐
+│ 2 Code Findings │
+└─────────────────┘
+                                    
+    application\src\aes_file_demo.py
+    ❯❱ config.semgrep.lab9b.python.secret.env-file-write
+          ❰❰ Blocking ❱❱
+          A generated AES key is written to a predictable local file. Confirm restrictive permissions and
+          prefer an OS secret store where available; never commit this file.                             
+                                                                                                         
+           62┆ ENV_FILE.write_text(
+           63┆     "# Local Lab 9A secret - generated locally, never commit this file.\n"
+           64┆     f"{ENV_NAME}={encoded}\n",
+           65┆     encoding="utf-8",
+           66┆ )
+   
+    ❯❱ config.semgrep.lab9b.python.crypto.ecb-mode
+          ❰❰ Blocking ❱❱
+          AES-ECB encrypts each block independently, so identical plaintext blocks produce identical     
+          ciphertext blocks and reveal structure. Use an authenticated mode such as AES-GCM with a unique
+          nonce per encryption.                                                                          
+                                                                                                         
+          144┆ ecb_enc = Cipher(algorithms.AES(key), modes.ECB()).encryptor()

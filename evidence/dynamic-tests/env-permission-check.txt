@@ -1,0 +1,11 @@
+﻿Controlled local secret-file handling check (no key value displayed)
+Target: D:\Projects\Lab9A-AES-ECB-GCM\.env
+exists=True
+ACL identities and rights:
+  BUILTIN\Administrators | FullControl | Allow
+  NT AUTHORITY\SYSTEM | FullControl | Allow
+  NT AUTHORITY\Authenticated Users | Modify, Synchronize | Allow
+  BUILTIN\Users | ReadAndExecute, Synchronize | Allow
+Git exclusion check:
+.gitignore:2:.env	.env
+Key value intentionally omitted from this evidence.
